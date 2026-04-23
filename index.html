@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>ATM Ultimate</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+        }
+
+        .box {
+            width: 340px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1e293b;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            background: #3b82f6;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .danger { background: red; }
+        .link { color: #60a5fa; cursor: pointer; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+
+<!-- LOGIN -->
+<div id="loginPage">
+    <h2>Login</h2>
+    <input id="loginAcc" placeholder="Account Number">
+    <input id="loginPin" type="password" placeholder="PIN">
+    <button class="btn" onclick="login()">Login</button>
+    <p class="link" onclick="showPage('forgotPage')">Forgot PIN?</p>
+    <button class="btn" onclick="showPage('createPage')">Create Account</button>
+</div>
+
+<!-- CREATE -->
+<div id="createPage" class="hidden">
+    <h2>Create Account</h2>
+    <input id="name" placeholder="Name">
+    <input id="mobile" placeholder="Mobile Number">
+    <input id="createAcc" placeholder="Account Number">
+    <input id="createPin" placeholder="PIN">
+    <button class="btn" onclick="create()">Create</button>
+    <button class="btn" onclick="showPage('loginPage')">Back</button>
+</div>
+
+<!-- FORGOT -->
+<div id="forgotPage" class="hidden">
+    <h2>Forgot PIN</h2>
+    <input id="forgotAcc" placeholder="Account Number">
+    <button class="btn" onclick="sendOTP()">Send OTP</button>
+    <button class="btn" onclick="showPage('loginPage')">Back</button>
+</div>
+
+<!-- OTP -->
+<div id="otpPage" class="hidden">
+    <h2>Enter OTP</h2>
+    <input id="otpInput">
+    <button class="btn" onclick="verifyOTP()">Login</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+    <h2 id="welcome"></h2>
+    <button class="btn" onclick="askPin('depositPage')">Deposit</button>
+    <button class="btn" onclick="askPin('withdrawPage')">Withdraw</button>
+    <button class="btn" onclick="askPin('balancePage')">Check Balance</button>
+    <button class="btn danger" onclick="askPin('logoutPage')">Logout</button>
+</div>
+
+<!-- PIN -->
+<div id="pinPage" class="hidden">
+    <h2>Enter PIN</h2>
+    <input id="verifyPin" type="password">
+    <button class="btn" onclick="verifyPinFunc()">Verify</button>
+</div>
+
+<!-- DEPOSIT -->
+<div id="depositPage" class="hidden">
+    <h2>Deposit</h2>
+    <input id="depAmt" type="number">
+    <button class="btn" onclick="deposit()">Submit</button>
+</div>
+
+<!-- WITHDRAW -->
+<div id="withdrawPage" class="hidden">
+    <h2>Withdraw</h2>
+    <input id="withAmt" type="number">
+    <button class="btn" onclick="withdraw()">Submit</button>
+</div>
+
+<!-- BALANCE -->
+<div id="balancePage" class="hidden">
+    <h2>Account Details</h2>
+    <p id="balText"></p>
+</div>
+
+<!-- LOGOUT -->
+<div id="logoutPage" class="hidden">
+    <h2>Logout</h2>
+    <button class="btn danger" onclick="logout()">Confirm</button>
+</div>
+
+</div>
+
+<script>
+let users = {};
+
+// ✅ DEFAULT AC COUNT (only addition)
+users["66565656656"] = {
+    name: "Default User",
+    mobile: "9876543210",
+    pin: "5555",
+    balance: 1000
+};
+
+let currentUser = null;
+let nextPage = "";
+let otp = "";
+let tempAcc = "";
+
+// Page switch
+function showPage(p) {
+    let pages = ["loginPage","createPage","forgotPage","otpPage","dashboard","pinPage","depositPage","withdrawPage","balancePage","logoutPage"];
+    pages.forEach(x => document.getElementById(x).classList.add("hidden"));
+    document.getElementById(p).classList.remove("hidden");
+}
+
+// Create
+function create() {
+    users[createAcc.value] = {
+        name: name.value,
+        mobile: mobile.value,
+        pin: createPin.value,
+        balance: 0
+    };
+    alert("Account Created");
+    showPage("loginPage");
+}
+
+// Login
+function login() {
+    let acc = loginAcc.value;
+    let pin = loginPin.value;
+
+    if(users[acc] && users[acc].pin === pin) {
+        currentUser = users[acc];
+        welcome.innerText = "Welcome " + currentUser.name;
+        showPage("dashboard");
+    } else {
+        alert("Wrong details");
+    }
+}
+
+// Forgot OTP
+function sendOTP() {
+    tempAcc = forgotAcc.value;
+    if(users[tempAcc]) {
+        otp = Math.floor(1000 + Math.random()*9000);
+        alert("OTP: " + otp);
+        showPage("otpPage");
+    }
+}
+
+// Verify OTP
+function verifyOTP() {
+    if(otpInput.value == otp) {
+        currentUser = users[tempAcc];
+        welcome.innerText = "Welcome " + currentUser.name;
+        showPage("dashboard");
+    }
+}
+
+// Ask PIN
+function askPin(page) {
+    nextPage = page;
+    showPage("pinPage");
+}
+
+// Verify PIN
+function verifyPinFunc() {
+    if(verifyPin.value == currentUser.pin) {
+
+        if(nextPage === "balancePage") {
+
+            let mobile = currentUser.mobile;
+            let last4 = mobile.slice(-4);
+
+            balText.innerText =
+                "Name: " + currentUser.name +
+                "\nMobile: ****" + last4 +
+                "\nBalance: ₹" + currentUser.balance;
+        }
+
+        showPage(nextPage);
+    } else {
+        alert("Wrong PIN ❌");
+    }
+}
+
+// Deposit
+function deposit() {
+    currentUser.balance += parseInt(depAmt.value);
+    showPage("dashboard");
+}
+
+// Withdraw
+function withdraw() {
+    let amt = parseInt(withAmt.value);
+    if(amt <= currentUser.balance) {
+        currentUser.balance -= amt;
+    }
+    showPage("dashboard");
+}
+
+// Logout
+function logout() {
+    currentUser = null;
+    showPage("loginPage");
+}
+</script>   
+
+</body>
+</html>
