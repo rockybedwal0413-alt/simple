@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple ATM</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #222;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .atm {
+            background: #333;
+            width: 350px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        #screen {
+            background: #111;
+            height: 150px;
+            margin: 20px 0;
+            padding: 20px;
+            font-size: 18px;
+            border: 2px solid #00f;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            height: 50px;
+            font-size: 20px;
+            border: none;
+            border-radius: 5px;
+            background: #007;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005;
+        }
+        .big-btn {
+            grid-column: span 3;
+            height: 60px;
+            background: #f00;
+            font-size: 18px;
+        }
+        .big-btn:hover {
+            background: #c00;
+        }
+    </style>
+</head>
+<body>
+    <div class="atm">
+        <h2>🏧 ATM</h2>
+        <div id="screen">Insert Card & Enter PIN</div>
+        
+        <div class="buttons">
+            <button onclick="num('1')">1</button>
+            <button onclick="num('2')">2</button>
+            <button onclick="num('3')">3</button>
+            <button onclick="num('4')">4</button>
+            <button onclick="num('5')">5</button>
+            <button onclick="num('6')">6</button>
+            <button onclick="num('7')">7</button>
+            <button onclick="num('8')">8</button>
+            <button onclick="num('9')">9</button>
+            <button onclick="num('0')">0</button>
+            <button onclick="clear()">Clear</button>
+            <button class="big-btn" onclick="enter()">ENTER</button>
+        </div>
+    </div>
+
+    <script>
+        let pin = "1234";
+        let input = "";
+        let balance = 1000;
+        let step = "pin";
+
+        function updateScreen() {
+            let text = "";
+            if (step == "pin") {
+                text = "Enter PIN: " + "*".repeat(input.length);
+            } else if (step == "menu") {
+                text = "1. Balance\n2. Withdraw\n3. Deposit";
+            } else if (step == "balance") {
+                text = "Balance: $" + balance;
+            } else if (step == "withdraw") {
+                text = "Withdraw: $" + input;
+            } else if (step == "deposit") {
+                text = "Deposit: $" + input;
+            }
+            document.getElementById("screen").innerHTML = text;
+        }
+
+        function num(n) {
+            if (input.length < 6) {
+                input += n;
+                updateScreen();
+            }
+        }
+
+        function clear() {
+            input = "";
+            updateScreen();
+        }
+
+        function enter() {
+            if (step == "pin") {
+                if (input == pin) {
+                    step = "menu";
+                    input = "";
+                } else {
+                    document.getElementById("screen").innerHTML = "Wrong PIN!";
+                    setTimeout(() => {
+                        input = "";
+                        updateScreen();
+                    }, 2000);
+                    return;
+                }
+            } else if (step == "menu") {
+                if (input == "1") {
+                    step = "balance";
+                    setTimeout(menu, 2000);
+                } else if (input == "2") {
+                    step = "withdraw";
+                    input = "";
+                } else if (input == "3") {
+                    step = "deposit";
+                    input = "";
+                }
+            } else if (step == "withdraw") {
+                let amt = parseFloat(input);
+                if (amt <= balance && amt > 0) {
+                    balance -= amt;
+                    document.getElementById("screen").innerHTML = "Withdrew $" + amt;
+                } else {
+                    document.getElementById("screen").innerHTML = "Not enough money!";
+                }
+                setTimeout(menu, 2000);
+            } else if (step == "deposit") {
+                let amt = parseFloat(input);
+                if (amt > 0) {
+                    balance += amt;
+                    document.getElementById("screen").innerHTML = "Deposited $" + amt;
+                }
+                setTimeout(menu, 2000);
+            }
+            input = "";
+            updateScreen();
+        }
+
+        function menu() {
+            step = "menu";
+            input = "";
+            updateScreen();
+        }
+
+        updateScreen();
+    </script>
+</body>
+</html>
